@@ -53,25 +53,24 @@ def extract_documents(html_content, base_url):
     soup = BeautifulSoup(html_content, 'lxml')
     document_extensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt']
     documents = []
-    
+
     for link in soup.find_all('a', href=True):
         href = link['href']
         # Proper URL encoding handling
         encoded_href = requests_utils.requote_uri(href)
         absolute_url = urljoin(base_url, encoded_href)
         link_text = link.text.strip()
-        
+
         if any(absolute_url.lower().endswith(ext) for ext in document_extensions):
             # Use link text or filename as document name
             if not link_text:
                 filename = os.path.basename(absolute_url)
                 link_text = os.path.splitext(filename)[0]
-            
             documents.append({
                 'name': link_text,
                 'url': absolute_url
             })
-    
+
     # Remove duplicates
     return list({doc['url']: doc for doc in documents}.values())
 
@@ -80,11 +79,11 @@ async def create_document_file(url, documents):
     domain = get_domain(url)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{domain}_documents_{timestamp}.txt"
-    
+
     with open(filename, 'w', encoding='utf-8') as f:
         for doc in documents:
-            f.write(f"{doc['name']}\n{doc['url']}\n\n")
-    
+            f.write(f"{doc['name']} {doc['url']}\n\n")
+
     return filename
 
 async def check_website_updates(client):
@@ -114,9 +113,9 @@ async def check_website_updates(client):
                     logger.error(f"Error sending update to {user_id}: {e}")
 
                 # Check for new documents
-                new_docs = [doc for doc in current_documents 
-                          if doc not in stored_documents]
-                
+                new_docs = [doc for doc in current_documents
+                            if doc not in stored_documents]
+
                 if new_docs:
                     try:
                         # Create and send TXT file
@@ -133,7 +132,7 @@ async def check_website_updates(client):
                     # Update stored data
                     url_info['documents'] = current_documents
                     url_info['hash'] = current_hash
-    
+
     save_user_data(user_data)
 
 async def start(client, message):
@@ -250,9 +249,9 @@ def main():
     """Main application"""
     app = Client(
         "my_bot",
-        api_id="YOUR_API_ID",
-        api_hash="YOUR_API_HASH",
-        bot_token="YOUR_BOT_TOKEN"
+        api_id="",
+        api_hash="",
+        bot_token=""
     )
 
     # Add command handlers
@@ -263,19 +262,5 @@ def main():
         MessageHandler(list_urls, filters.command("list")),
         MessageHandler(list_documents, filters.command("documents"))
     ]
-    
-    for handler in handlers:
-        app.add_handler(handler)
 
-    # Setup scheduler
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(check_website_updates, 'interval', minutes=30, args=[app])
-    scheduler.start()
-
-    try:
-        app.run()
-    except Exception as e:
-        logger.error(f"Error running bot: {e}")
-
-if __name__ == '__main__':
-    main()
+    for handler in
