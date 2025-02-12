@@ -263,4 +263,18 @@ def main():
         MessageHandler(list_documents, filters.command("documents"))
     ]
 
-    for handler in
+    for handler in handlers:
+        app.add_handler(handler)
+
+    # Setup scheduler
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(check_website_updates, 'interval', minutes=30, args=[app])
+    scheduler.start()
+
+    try:
+        app.run()
+    except Exception as e:
+        logger.error(f"Error running bot: {e}")
+
+if __name__ == '__main__':
+    main()
